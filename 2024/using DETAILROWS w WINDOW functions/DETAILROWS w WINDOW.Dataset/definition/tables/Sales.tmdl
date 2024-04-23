@@ -1,0 +1,400 @@
+table Sales
+	lineageTag: e6b4ec1d-7d58-42cc-9c03-5718f14b1577
+
+	measure 'Total Sales' = SUMX ( Sales, Sales[Quantity] * Sales[Net Price] )
+		formatString: #,0
+		displayFolder: Base Measures
+		lineageTag: d6c4262c-5cb6-40af-bb38-84ac772273d6
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure Test = ```
+			VAR TableFilter =
+			    CALCULATETABLE ( 
+			        SUMMARIZE ( 
+			            Sales,
+			            Customer[CustomerKey],
+			            Products[Brand],
+			            Products[Color],
+			            Dates[Year]
+			        ),
+			        Customer[Country] = "Australia",
+			        Products[Brand] IN { "Contoso" , "Litware" },
+			        Products[Color] IN { "Red", "Blue" },
+			        Dates[Year] IN { 2016, 2017 }
+			    )
+			VAR Result = 
+			    CALCULATE ( [Total Sales], KEEPFILTERS ( TableFilter ) )
+			RETURN 
+			    Result
+			```
+		formatString: #,0
+		displayFolder: First Example
+		lineageTag: 40384195-7274-4826-8967-75a5a0c754ac
+
+	measure 'DetailRows Template'
+		displayFolder: First Example
+		lineageTag: 38299863-8d4b-4e97-b284-44c8e1ca7f8b
+
+		detailRowsDefinition = ```
+				CALCULATETABLE ( 
+				    SUMMARIZE ( 
+				        Sales,
+				        Customer[CustomerKey],
+				        Products[Brand],
+				        Products[Color],
+				        Dates[Year]
+				    ),
+				    Customer[Country] = "Australia",
+				    KEEPFILTERS ( Products[Brand] IN { "Contoso" , "Litware" } ),
+				    KEEPFILTERS ( Products[Color] IN { "Red", "Blue" } ),
+				    KEEPFILTERS ( Dates[Year] IN { 2016, 2017 } )
+				)
+				```
+
+	measure 'Sales Amount DR' = ```
+			CALCULATE ( 
+			    [Total Sales],
+			    DETAILROWS ( [DetailRows Template] )
+			)
+			```
+		formatString: #,0
+		displayFolder: First Example
+		lineageTag: b435e3d6-ad94-401d-81af-67ba6510231a
+
+	measure 'Transactions DR' = ```
+			CALCULATE ( 
+			    COUNTROWS ( Sales ),
+			    DETAILROWS ( [DetailRows Template] )
+			)
+			```
+		formatString: 0
+		displayFolder: First Example
+		lineageTag: 893e9ed5-a42b-4d58-985b-d9459178d5d2
+
+	measure 'Products Columns'
+		displayFolder: Second Example
+		lineageTag: fd97c6b4-7311-4152-aaf0-253c5076ebd5
+
+		detailRowsDefinition = ```
+				ALL ( 
+				    Products[Category], 
+				    Products[Brand], 
+				    Products[Color]
+				)
+				```
+
+	measure 'Brand Total' = ```
+			CALCULATE ( 
+			    [Total Sales],
+			    WINDOW ( 
+			        1, ABS,
+			        -1, ABS,
+			        DETAILROWS ( [Products Columns] ),
+			        PARTITIONBY (  Products[Category] )
+			    )
+			)
+			```
+		formatString: #,0
+		displayFolder: Second Example
+		lineageTag: b26475d9-8a78-495f-89cf-4d1509e7233a
+
+	measure 'Category Total' = ```
+			CALCULATE ( 
+			    [Total Sales],
+			    WINDOW ( 
+			        1, ABS,
+			        -1, ABS,
+			        DETAILROWS ( [Products Columns] )
+			    )
+			)
+			```
+		formatString: #,0
+		displayFolder: Second Example
+		lineageTag: fbb0ca27-72a4-4432-b9e8-f372ea6c3d86
+
+	measure 'Color Total' = ```
+			CALCULATE ( 
+			    [Total Sales],
+			    WINDOW ( 
+			        1, ABS,
+			        -1, ABS,
+			        DETAILROWS ( [Products Columns] ),
+			        PARTITIONBY ( Products[Category], Products[Brand] )
+			    )
+			)
+			```
+		formatString: #,0
+		displayFolder: Second Example
+		lineageTag: e97a8fb0-43d8-4555-b920-c17d000b0ae0
+
+	measure 'Virtual Columns DR' = ```
+			
+			//VAR BaseColumns = 
+			//    CALCULATETABLE(
+			//        SUMMARIZE (
+			//            Sales,
+			//            Dates[Year],
+			//            Dates[Month Number],
+			//            Products[Brand],
+			//            Products[Color],
+			//            Customer[Gender],
+			//            Customer[Continent]
+			//        ),
+			//        Dates[Year] IN { 2014, 2015 },
+			//        REMOVEFILTERS ( Sales )
+			//    )
+			//VAR ExtendedColumns = 
+			//    ADDCOLUMNS (
+			//        BaseColumns, 
+			//        "@Sales", [Total Sales],
+			//        "@Cost", [Total Cost],
+			//        "@Profit", [Total Profit]
+			//    )
+			//RETURN 
+			//    ExtendedColumns
+			```
+		displayFolder: Third Example
+		lineageTag: bd8662e5-6a41-4169-9957-9294c213f968
+
+		detailRowsDefinition = ```
+				VAR BaseColumns = 
+				    CALCULATETABLE(
+				        SUMMARIZE (
+				            Sales,
+				            Dates[Year],
+				            Dates[Month Number],
+				            Products[Brand],
+				            Products[Color],
+				            Customer[Gender],
+				            Customer[Continent]
+				        ),
+				        Dates[Year] IN { 2014, 2015 },
+				        REMOVEFILTERS ( Sales )
+				    )
+				VAR ExtendedColumns = 
+				    ADDCOLUMNS (
+				        BaseColumns, 
+				        "@Sales", [Total Sales],
+				        "@Cost", [Total Cost],
+				        "@Profit", [Total Profit]
+				    )
+				RETURN 
+				    ExtendedColumns
+				```
+
+	measure 'Total Cost' = SUMX ( Sales, Sales[Quantity] * Sales[Unit Cost] )
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Base Measures
+		lineageTag: c9d0fec9-8aff-4a57-897a-b13086d5a250
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Total Profit' = [Total Sales] - [Total Cost]
+		formatString: #,0
+		displayFolder: Base Measures
+		lineageTag: dab3265f-4697-4421-9005-5005b00085cc
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Contoso Red & Blue' = ```
+			
+			CALCULATE ( 
+			    [Total Sales],
+			    KEEPFILTERS (
+			        FILTER ( 
+			            DETAILROWS ( [Products Columns] ),
+			            Products[Color] IN { "Red", "Blue" }
+			        )
+			    )
+			)
+			```
+		formatString: #,0.00
+		displayFolder: Third Example
+		lineageTag: 919fd84a-b7cc-4254-9f5d-4a17eff82e74
+
+	measure 'Virtual Columns DR Test' = ```
+			
+			SUMX ( 
+			    CALCULATETABLE ( 
+			        DETAILROWS ( [Virtual Columns DR] ),
+			        KEEPFILTERS ( Customer )
+			    ),
+			    [@Profit]
+			)
+			```
+		formatString: #,0
+		displayFolder: Third Example
+		lineageTag: ec61e364-9def-4f7c-8536-016c19ebfa4a
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Profit by Continent' = ```
+			
+			SUMX ( 
+			    WINDOW ( 
+			        1, ABS, -1, ABS,
+			        DETAILROWS ( [Virtual Columns DR] ),
+			        PARTITIONBY ( Customer[Continent] )
+			    ),
+			    [@Profit]
+			)
+			```
+		formatString: #,0
+		displayFolder: Third Example
+		lineageTag: b103f78d-d07e-4bb0-a20a-113b6f4140bf
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Top Colors each Year' = ```
+			
+			VAR YearColor = 
+			    GROUPBY ( 
+			        DETAILROWS ( [Virtual Columns DR] ),
+			        Dates[Year],
+			        Products[Color],
+			        "@Sales", SUMX ( CURRENTGROUP (), [@Sales] )
+			    )
+			VAR ColorRank = 
+			    ADDCOLUMNS ( 
+			        YearColor,
+			        "MonthRank", RANK ( 
+			            DENSE, 
+			            YearColor, 
+			            ORDERBY ( [@Sales], DESC ), 
+			            PARTITIONBY ( Dates[Year] ) 
+			        )
+			    )
+			VAR TopColors = 
+			    FILTER ( 
+			        ColorRank, 
+			        [MonthRank] <= 2 
+			            && Products[Color] IN VALUES ( Products[Color] )
+			            && Dates[Year] IN VALUES ( Dates[Year] )
+			    )
+			VAR Result = 
+			    SUMX ( TopColors, [@Sales] )
+			RETURN 
+			    Result
+			```
+		formatString: #,0
+		displayFolder: Third Example
+		lineageTag: 9cc4620d-e719-4a99-b47e-33ade03ca725
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Cost RT DR' = ```
+			
+			SUMX ( 
+			    WINDOW ( 
+			        1, ABS,
+			        0, REL,
+			        DETAILROWS ( [Virtual Columns DR] )
+			    ),
+			    [@Cost]
+			)
+			```
+		formatString: #,0
+		displayFolder: Third Example
+		lineageTag: 318240b2-338c-4673-a07f-06169ed27177
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Sales RT DR' = ```
+			
+			SUMX ( 
+			    WINDOW ( 
+			        1, ABS,
+			        0, REL,
+			        DETAILROWS ( [Virtual Columns DR] ),
+			        ORDERBY ( Dates[Month Number], ASC ),
+			        PARTITIONBY ( Dates[Year] )
+			    ),
+			    [@Sales]
+			)
+			```
+		formatString: #,0.00
+		displayFolder: Third Example
+		lineageTag: ae1448e2-8603-45d9-9622-e4f73cfe9abe
+
+	column 'Order Date'
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: 48ec3fcd-0f86-4245-8bee-14eff14481a6
+		summarizeBy: none
+		sourceColumn: Order Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column CustomerKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2488dc71-00e9-47ef-8f98-7ae064aa328b
+		summarizeBy: none
+		sourceColumn: CustomerKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1bf63909-e7b1-485b-a9bc-c4b0df250f40
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quantity
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 964651e8-bb0b-439d-bdf4-676c8459bf4b
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Net Price'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 68e04682-5964-4042-a8a5-f782a319a390
+		summarizeBy: sum
+		sourceColumn: Net Price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column 'Unit Cost'
+		dataType: decimal
+		isHidden
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 09c48765-b041-48d8-949c-f14f6e077aba
+		summarizeBy: sum
+		sourceColumn: Unit Cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	partition Sales = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Databases("SUMMER\SQL2022"),
+				    #"Contoso 1M" = Source{[Name="Contoso 1M"]}[Data],
+				    dbo_Sales = #"Contoso 1M"{[Schema="dbo",Item="Sales"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(dbo_Sales,{"Order Date", "CustomerKey", "ProductKey", "Quantity", "Net Price", "Unit Cost"})
+				in
+				    #"Removed Other Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

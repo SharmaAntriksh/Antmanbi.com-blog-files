@@ -1,0 +1,78 @@
+table Table
+	lineageTag: fe9a62b8-0f28-40a3-9450-569a8749f642
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 43781a80-22e8-479f-a816-b6bbad66596d
+		summarizeBy: sum
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: Dates[Year]
+
+		annotation SummarizationSetBy = Automatic
+
+	column @Sales
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: b0c046c4-4a79-4381-a0a8-82562aa76782
+		summarizeBy: sum
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: [@Sales]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column @Cost
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: f655b84a-4038-44ca-ab45-dda9624363c3
+		summarizeBy: sum
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: [@Cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column @Profit
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 97bef571-e3e2-4b47-ab25-8abf66636b22
+		summarizeBy: sum
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: [@Profit]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column 'Month Number'
+		dataType: int64
+		formatString: 0
+		lineageTag: 82a04629-d7cd-4304-a90b-d622d59ef4f8
+		summarizeBy: sum
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: Dates[Month Number]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Table = calculated
+		mode: import
+		source = ```
+				
+				ADDCOLUMNS ( 
+				    ALL ( Dates[Year], Dates[Month Number] ), 
+				    "@Sales", [Total Sales],
+				    "@Cost", [Total Cost],
+				    "@Profit", [Total Profit]
+				)
+				```
+
+	annotation PBI_Id = 9d60d60657744cf3b5808389e2f1f663
+

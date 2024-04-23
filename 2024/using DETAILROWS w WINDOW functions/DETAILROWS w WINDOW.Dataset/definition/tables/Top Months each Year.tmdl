@@ -1,0 +1,78 @@
+table 'Top Months each Year'
+	lineageTag: a63133eb-12d7-467e-81b3-faa270d46a10
+
+	column Dates_Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 880b7bb9-2299-4fc3-843e-59a6c08a9265
+		summarizeBy: sum
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: Dates[Year]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Dates_Month Number'
+		dataType: int64
+		formatString: 0
+		lineageTag: 81e5fea5-f5ee-473b-9880-48ce92a06666
+		summarizeBy: sum
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: Dates[Month Number]
+
+		annotation SummarizationSetBy = Automatic
+
+	column @Sales
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 098c6b0c-7a51-4167-8328-ef135dd1491c
+		summarizeBy: sum
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: [@Sales]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column MonthRank
+		dataType: int64
+		formatString: 0
+		lineageTag: 4a345449-5040-4ec9-827f-61c23b6a3b47
+		summarizeBy: sum
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: [MonthRank]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Top Months each Year' = calculated
+		mode: import
+		source = ```
+				
+				VAR YearMonth = 
+				    GROUPBY ( 
+				        DETAILROWS ( [Virtual Columns DR] ),
+				        Dates[Year],
+				        Dates[Month Number],
+				        "@Sales", SUMX ( CURRENTGROUP (), [@Sales] )
+				    )
+				VAR MonthRank = 
+				    ADDCOLUMNS ( 
+				        YearMonth,
+				        "MonthRank", RANK ( 
+				            DENSE, 
+				            YearMonth, 
+				            ORDERBY ( [@Sales], DESC ), 
+				            PARTITIONBY ( Dates[Year] ) 
+				        )
+				    )
+				VAR TopMonths = 
+				    FILTER ( MonthRank, [MonthRank] <= 2 )
+				RETURN 
+				    TopMonths
+				```
+
+	annotation PBI_Id = 48d93c6fc9b14aaa92d9bba5747e9c77
+

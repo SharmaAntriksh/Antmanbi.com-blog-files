@@ -1,0 +1,4 @@
+relationship ab685e28-55c9-4190-9c94-2338b1f9a05e
+	fromColumn: Sales.OrderDateKey
+	toColumn: Dates.DateKey
+

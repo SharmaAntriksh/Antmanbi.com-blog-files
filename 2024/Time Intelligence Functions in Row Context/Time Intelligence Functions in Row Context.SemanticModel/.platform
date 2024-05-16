@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "Time Intelligence Functions in Row Context"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "bc766266-f4ed-4f30-b546-f392bd26c72c"
+  }
+}

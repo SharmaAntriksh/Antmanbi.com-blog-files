@@ -1,0 +1,48 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 293.31053268314434,
+            "y": 187.25990014769633
+          },
+          "nodeIndex": "Sales",
+          "nodeLineageTag": "7be827f3-0d34-40a7-9cfe-b00c4d10f639",
+          "size": {
+            "height": 211.6098849060445,
+            "width": 234
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 0,
+            "y": 0
+          },
+          "nodeIndex": "Dates",
+          "nodeLineageTag": "a9d9b9b2-8e8c-4da5-b3e6-5f218c6d7b5f",
+          "size": {
+            "height": 235.26926208997821,
+            "width": 234
+          },
+          "zIndex": 1
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 136.96066657894781,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

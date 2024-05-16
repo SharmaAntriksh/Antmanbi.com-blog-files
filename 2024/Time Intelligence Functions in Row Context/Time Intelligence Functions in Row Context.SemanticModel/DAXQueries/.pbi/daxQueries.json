@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "tabOrder": [
+    "Base Query",
+    "Manual SAMEPERIODLASTYEAR",
+    "Dates Intersection 2018",
+    "Dates2 Example",
+    "Cancel Context Transition of SPLY",
+    "FIRSTDATE",
+    "MAX"
+  ],
+  "defaultTab": "FIRSTDATE"
+}

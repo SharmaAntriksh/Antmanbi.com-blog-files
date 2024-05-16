@@ -1,0 +1,68 @@
+table Sales
+	lineageTag: 7be827f3-0d34-40a7-9cfe-b00c4d10f639
+
+	measure 'Sales Amount' =
+			
+			SUMX ( Sales, Sales[Quantity] * Sales[Net Price] )
+		formatString: #,0
+		lineageTag: ecd5f6f6-db51-41a2-9ec9-7b8147518ba8
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	column 'Order Date'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: cdfe52c0-2d91-4178-aefb-cc3de3f16063
+		summarizeBy: none
+		sourceColumn: Order Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: 3cfee653-b2f2-4c2f-a9fc-48e1a7b77e71
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Net Price'
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 80884bbb-cec6-4deb-9738-4280e2617385
+		summarizeBy: sum
+		sourceColumn: Net Price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column OrderDateKey = FORMAT ( Sales[Order Date], "YYYYMMDD" )
+		dataType: string
+		lineageTag: 88f4e3ea-7216-4fe1-9cce-e42c67740000
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Sales = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Databases("summer\sql2022"),
+				    #"Contoso 100K" = Source{[Name="Contoso 100K"]}[Data],
+				    dbo_Sales = #"Contoso 100K"{[Schema="dbo",Item="Sales"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(dbo_Sales,{"Order Date", "Quantity", "Net Price"}),
+				    #"Added Custom" = Table.AddColumn(#"Removed Other Columns", "Year", each Date.Year ( [Order Date] )),
+				    #"Filtered Rows" = Table.SelectRows(#"Added Custom", each ([Year] = 2017 or [Year] = 2018 or [Year] = 2019)),
+				    #"Removed Columns" = Table.RemoveColumns(#"Filtered Rows",{"Year"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

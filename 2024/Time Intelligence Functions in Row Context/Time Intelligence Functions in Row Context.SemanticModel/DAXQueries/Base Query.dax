@@ -1,0 +1,10 @@
+EVALUATE
+	ADDCOLUMNS (
+	    VALUES ( Dates[Year] ),
+	    "Sales Amount", [Sales Amount],
+	    "Sales Amount PY",
+	        CALCULATE (
+	            [Sales Amount],
+	            SAMEPERIODLASTYEAR ( Dates[Date] )
+	        )
+	)

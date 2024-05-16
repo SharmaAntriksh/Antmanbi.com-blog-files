@@ -1,0 +1,11 @@
+EVALUATE
+	SUMMARIZECOLUMNS ( 
+		Dates[Date],
+		"Rolling Date Count",
+		COUNTROWS ( 
+			FILTER ( 
+				ALL ( Dates[Date] ),
+				Dates[Date] <= MAX ( Dates[Date] )
+			)
+		)
+	)

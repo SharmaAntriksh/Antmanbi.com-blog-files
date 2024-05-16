@@ -1,0 +1,79 @@
+table Dates
+	lineageTag: a9d9b9b2-8e8c-4da5-b3e6-5f218c6d7b5f
+	dataCategory: Time
+
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: yyyy-mm-dd
+		lineageTag: 151650ee-be8d-4aa2-9e54-97875d22deaf
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 8038bfba-5f57-4221-89ce-68111ff0380a
+		summarizeBy: none
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: string
+		lineageTag: 9949b9ff-0f46-442c-8e58-01aeb0727d75
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Number'
+		dataType: int64
+		formatString: 0
+		lineageTag: 8e806840-fbd4-4a08-9ae0-140c472d0810
+		summarizeBy: none
+		sourceColumn: Month Number
+
+		annotation SummarizationSetBy = Automatic
+
+	column Dates2 = Dates[Date]
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 682795a2-7677-4945-9484-a6eee6536536
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column DateKey = FORMAT ( Dates[Date], "YYYYMMDD" )
+		dataType: string
+		lineageTag: 85873b2e-1a17-41ca-a964-d4e5705c611c
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Dates = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Databases("summer\sql2022"),
+				    #"Contoso 100K" = Source{[Name="Contoso 100K"]}[Data],
+				    dbo_Date = #"Contoso 100K"{[Schema="dbo",Item="Date"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(dbo_Date,{"Date", "Year", "Month", "Month Number"}),
+				    #"Filtered Rows" = Table.SelectRows(#"Removed Other Columns", each ([Year] = 2017 or [Year] = 2018 or [Year] = 2019 or [Year] = 2020))
+				in
+				    #"Filtered Rows"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

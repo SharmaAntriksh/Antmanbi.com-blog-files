@@ -1,0 +1,22 @@
+EVALUATE
+	ADDCOLUMNS (
+	    VALUES ( Dates[Year] ),
+	    "Sales Amount", [Sales Amount],
+	    "Sales Amount PY",
+	        CALCULATE (
+	            [Sales Amount],
+	            VAR Year_From_Context_Transition = 	
+	            	Dates[Year]
+	            VAR Dates_Of_Filtered_Year = 
+	            	CALCULATETABLE ( 
+	            		DISTINCT ( Dates[Date] ),
+	            		Dates[Year] = Year_From_Context_Transition
+            		)
+            	VAR ShiftDates = 
+            		SAMEPERIODLASTYEAR ( Dates_Of_Filtered_Year )
+            	RETURN
+            		ShiftDates
+	        )
+	)
+	
+	
